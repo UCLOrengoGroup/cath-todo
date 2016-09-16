@@ -20,9 +20,9 @@ We cannot guarantee a timeline in which feature requests will be implemented, ho
 ### I have an issue, but I'm new to GitHub - what do I do?
 
  * sign up to get a GitHub account (it's free and useful)
- * click the "Issues" tab
+ * click the ["Issues"](https://github.com/UCLOrengoGroup/cath-todo/issues) tab
  * scan through the existing issues to check this issue doesn't already exist
- * click the "New Issue" button
+ * click the ["New Issue"](https://github.com/UCLOrengoGroup/cath-todo/issues/new) button
  * provide as much detail as you can
 
 ## About CATH
