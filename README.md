@@ -15,6 +15,12 @@ We cannot guarantee a timeline in which feature requests will be implemented, ho
 * please check whether a similar issue already exists before creating a new one
 * if a similar issue does exist, please add ```+1``` to let us know you consider this important
 
+## About CATH
+
+http://cathdb.info
+
+[CATH](http://cathdb.info) is a [bioinformatics](https://en.wikipedia.org/wiki/Bioinformatics) resource that groups the 3D structures of [protein domains](https://en.wikipedia.org/wiki/Protein_domain) into superfamilies (a collection of domains that are related by evolution). It uses this body of work (built over 20 years) to predict the location of these structural domains on over 50 million known protein sequences (in a sister resource: [Gene3D](http://gene3d.biochem.ucl.ac.uk)). These data - alongside known information about protein function and functional sites - help us to understand and recognise patterns that occur during evolution. These patterns can be used to further our understanding of the mechanisms of evolution and to predict structure and function of previously unannotated protein sequences.
+
 ## FAQ
 
 ### I have an issue, but I'm new to GitHub - what do I do?
@@ -24,12 +30,6 @@ We cannot guarantee a timeline in which feature requests will be implemented, ho
  * scan through the existing issues to check this issue doesn't already exist
  * click the ["New Issue"](https://github.com/UCLOrengoGroup/cath-todo/issues/new) button
  * provide as much detail as you can
-
-## About CATH
-
-http://cathdb.info
-
-[CATH](http://cathdb.info) is a [bioinformatics](https://en.wikipedia.org/wiki/Bioinformatics) resource that groups the 3D structures of [protein domains](https://en.wikipedia.org/wiki/Protein_domain) into superfamilies (a collection of domains that are related by evolution). It uses this body of work (built over 20 years) to predict the location of these structural domains on over 50 million known protein sequences (in a sister resource: [Gene3D](http://gene3d.biochem.ucl.ac.uk)). These data - alongside known information about protein function and functional sites - help us to understand and recognise patterns that occur during evolution. These patterns can be used to further our understanding of the mechanisms of evolution and to predict structure and function of previously unannotated protein sequences.
 
 ## References
 
