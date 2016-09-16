@@ -17,8 +17,6 @@ We cannot guarantee a timeline in which feature requests will be implemented, ho
 
 ## About CATH
 
-http://cathdb.info
-
 [CATH](http://cathdb.info) is a [bioinformatics](https://en.wikipedia.org/wiki/Bioinformatics) resource that groups the 3D structures of [protein domains](https://en.wikipedia.org/wiki/Protein_domain) into superfamilies (a collection of domains that are related by evolution). It uses this body of work (built over 20 years) to predict the location of these structural domains on over 50 million known protein sequences (in a sister resource: [Gene3D](http://gene3d.biochem.ucl.ac.uk)). These data - alongside known information about protein function and functional sites - help us to understand and recognise patterns that occur during evolution. These patterns can be used to further our understanding of the mechanisms of evolution and to predict structure and function of previously unannotated protein sequences.
 
 ## FAQ
