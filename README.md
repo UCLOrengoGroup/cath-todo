@@ -15,6 +15,16 @@ We cannot guarantee a timeline in which feature requests will be implemented, ho
 * please check whether a similar issue already exists before creating a new one
 * if a similar issue does exist, please add ```+1``` to let us know you consider this important
 
+## FAQ
+
+### I have an issue, but I'm new to GitHub - what do I do?
+
+ * sign up to get a GitHub account (it's free and useful)
+ * click the "Issues" tab
+ * scan through the existing issues to check this issue doesn't already exist
+ * click the "New Issue" button
+ * provide as much detail as you can
+
 ## About CATH
 
 http://cathdb.info
