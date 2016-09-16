@@ -1,12 +1,12 @@
 # CATH: TODO
 
-This project exists to allow our external users (that's you) to create and keep track of issues relating to the [CATH protein structure classification](http://cathdb.info), including:
+This project exists to allow our external users (that's you) to create and keep track of issues relating to the [CATH protein structure classification](http://cathdb.info), e.g
 
- * CATH data
  * CATH web pages 
+ * CATH data
  * CATH API
 
-We encourage anyone and everyone to add issues - no matter how trivial or complex they may seem. This might be a query because some part of the documentation is unclear, a wishlist for a feature you would like to see, or a problems/bug encountered on the web pages (hopefully not). Either way: all feedback is very welcome.
+We encourage anyone and everyone to add issues - no matter how trivial or complex they may seem. Perhaps you have a query because some part of our documentation is unclear, perhaps you have a wishlist for a feature you would love to see, or a problem/bug encountered on the web pages (hopefully not). Either way: all feedback is very welcome.
 
 We cannot guarantee a timeline in which feature requests will be implemented, however the level of community interest in any particular issue will definitely be taken into account as we prioritise our work.
 
