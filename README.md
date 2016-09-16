@@ -10,7 +10,9 @@ We encourage anyone and everyone to add issues - no matter how trivial or comple
 
 We cannot guarantee a timeline in which feature requests will be implemented, however the level of community interest in any particular issue will definitely be taken into account as we prioritise our work.
 
-* please do check that a similar issue doesn't already exist before creating a new one
+Notes:
+
+* please check whether a similar issue already exists before creating a new one
 * if a similar issue does exist, please add ```+1``` to let us know you consider this important
 
 ## About CATH
