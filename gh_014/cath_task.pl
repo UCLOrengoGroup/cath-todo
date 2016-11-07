@@ -6,12 +6,12 @@ use Scalar::Util qw(reftype);
 
 use FindBin;        # core:     no need to install
 use Data::Dumper;   # core:     no need to install
-use JSON::Any;      # non-core: need to install via CPAN or (cpanm)
+use JSON::MaybeXS;  # non-core: need to install via CPAN or (cpanm)
 
 my $IN_FILE  = "$FindBin::Bin/seq_antigens_151.fasta";
 my $OUT_FILE = "$FindBin::Bin/task_ids.csv";
 my $URL_BASE = "http://www.cathdb.info/search/by_funfhmmer";
-my $JSON = JSON::Any->new();
+my $JSON = JSON::MaybeXS->new();
 
 my $ua = LWP::UserAgent->new;
 $ua->timeout(10);
