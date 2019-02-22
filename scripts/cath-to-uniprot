@@ -1,0 +1,85 @@
+#!/usr/bin/env python3
+
+"""
+Script that maps a list of CATH domain identifiers to UniProtKB 
+(using the Proteins API from UniProtKB)
+
+usage: cath-to-uniprot -i <cath_domains.list>
+
+Where <cath_domains.list> is a file containing one CATH domain id per line 
+(only the first column is used; lines starting with '#' are ignored)
+
+
+"""
+
+
+import argparse
+import csv
+import logging
+import os.path
+import sys
+
+import requests
+
+logging.basicConfig()
+LOG = logging.getLogger(__name__)
+
+class Uniprot(object):
+    def __init__(self, *, accession, gene_id, taxon_id, taxon_lineage):
+        self.accession = accession
+        self.gene_id = gene_id
+        self.taxon_id = taxon_id
+        self.taxon_lineage = taxon_lineage
+
+    @classmethod
+    def new_from_api_data(cls, data):
+        accession = data['accession']
+        gene_id = data['id']
+        org = data['organism']
+        taxon_id = org['taxonomy']
+        taxon_lineage = org['lineage']
+        return cls(accession=accession, gene_id=gene_id, taxon_id=taxon_id, 
+            taxon_lineage=taxon_lineage)
+
+def uniprots_for_pdb(pdb_id, *, offset=0, size=100):
+
+    uniprot_base = 'https://www.ebi.ac.uk/proteins/api/proteins'
+    headers = {"Accept": "application/json"}
+
+    url = "{}/pdb:{}?offset={}&size={}".format(uniprot_base, pdb_id, offset, size)
+    r = requests.get(url, headers=headers)
+    if not r.ok:
+        r.raise_for_status()
+    
+    LOG.debug("url: {}".format(url))
+    LOG.debug("r: {}".format(r.content[0:100]))
+    body = r.json()
+    uniprot_entries = []
+    for uniprot_data in body:
+        u = Uniprot.new_from_api_data(uniprot_data)
+        uniprot_entries.extend([u])
+
+    return uniprot_entries
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="Provide UniProtKB information for CATH domains")
+    parser.add_argument('-i', dest="infile", required=True,
+        help="input file (CATH domain ids)")
+    parser.add_argument('-o', dest="outfile", nargs="?", type=argparse.FileType('w'), default=sys.stdout,
+        help="output file (UniProtKB info)")
+    args = parser.parse_args()
+
+    writer = csv.writer(args.outfile, delimiter='\t')
+
+
+    with open(args.infile, 'r') as infh:
+        writer.writerow(["domain_id", "pdb_code", "accession", "gene_id", "taxon_id"])
+        for line in infh:
+            if line.startswith('#'):
+                continue
+            domain_id  = line.split()[0]
+            pdb_code = domain_id[0:4]
+            uniprot_entries = uniprots_for_pdb(pdb_code)
+            for u in uniprot_entries:
+                writer.writerow([domain_id, pdb_code, u.accession, u.gene_id, u.taxon_id])
+
