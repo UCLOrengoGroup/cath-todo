@@ -41,23 +41,29 @@ class Uniprot(object):
         return cls(accession=accession, gene_id=gene_id, taxon_id=taxon_id, 
             taxon_lineage=taxon_lineage)
 
+UNIPROTS_FOR_PDB_CACHE={}
 def uniprots_for_pdb(pdb_id, *, offset=0, size=100):
 
     uniprot_base = 'https://www.ebi.ac.uk/proteins/api/proteins'
     headers = {"Accept": "application/json"}
 
-    url = "{}/pdb:{}?offset={}&size={}".format(uniprot_base, pdb_id, offset, size)
-    r = requests.get(url, headers=headers)
-    if not r.ok:
-        r.raise_for_status()
-    
-    LOG.debug("url: {}".format(url))
-    LOG.debug("r: {}".format(r.content[0:100]))
-    body = r.json()
-    uniprot_entries = []
-    for uniprot_data in body:
-        u = Uniprot.new_from_api_data(uniprot_data)
-        uniprot_entries.extend([u])
+    if pdb_id in UNIPROTS_FOR_PDB_CACHE:
+        uniprot_entries = UNIPROTS_FOR_PDB_CACHE[pdb_id]
+    else:
+        url = "{}/pdb:{}?offset={}&size={}".format(uniprot_base, pdb_id, offset, size)
+        r = requests.get(url, headers=headers)
+        if not r.ok:
+            r.raise_for_status()
+        
+        LOG.debug("url: {}".format(url))
+        LOG.debug("r: {}".format(r.content[0:100]))
+        body = r.json()
+        uniprot_entries = []
+        for uniprot_data in body:
+            u = Uniprot.new_from_api_data(uniprot_data)
+            uniprot_entries.extend([u])
+
+        UNIPROTS_FOR_PDB_CACHE[pdb_id] = uniprot_entries
 
     return uniprot_entries
 
