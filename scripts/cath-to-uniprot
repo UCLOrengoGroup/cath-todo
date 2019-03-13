@@ -21,8 +21,16 @@ import sys
 
 import requests
 
+#logging.basicConfig(level=logging.DEBUG)
 logging.basicConfig()
 LOG = logging.getLogger(__name__)
+
+class PdbNotFoundError(Exception):
+    def __init__(self, pdb_id):
+        self.pdb_id = pdb_id
+    
+    def __str__(self):
+        return "Failed to find PDB '{}' (probably obsolete)".format(self.pdb_id)
 
 class Uniprot(object):
     def __init__(self, *, accession, gene_id, taxon_id, taxon_lineage):
@@ -64,31 +72,45 @@ def get_uniprot(uniprot_acc):
 
     return uniprot_entry
 
-UNIPROT_ACCS_FOR_PDB_CACHE={}
-def get_uniprot_accs_for_pdb(pdb_id, *, offset=0, size=100):
+UNIPROT_ACC_FOR_PDB_CACHE={}
+def get_uniprot_acc_for_pdbchain(pdb_id, chain_id):
 
+    cache_key = '{}_{}'.format(pdb_id, chain_id)
+    
     pdbe_base = 'https://www.ebi.ac.uk/pdbe/api/mappings/uniprot'
     headers = {"Accept": "application/json"}
 
-    if pdb_id in UNIPROT_ACCS_FOR_PDB_CACHE:
-        uniprot_accs = UNIPROT_ACCS_FOR_PDB_CACHE[pdb_id]
+    if cache_key in UNIPROT_ACC_FOR_PDB_CACHE:
+        uniprot_acc = UNIPROT_ACC_FOR_PDB_CACHE[cache_key]
     else:
         url = "{}/{}".format(pdbe_base, pdb_id)
         r = requests.get(url, headers=headers)
+        if r.status_code == 404:
+            raise PdbNotFoundError(pdb_id)
+
+        LOG.debug("url: {}".format(url))
+        LOG.debug("r: {}".format(r.content[0:100]))
+
         if not r.ok:
             r.raise_for_status()
         
-        LOG.debug("url: {}".format(url))
-        LOG.debug("r: {}".format(r.content[0:100]))
         body = r.json()
         if pdb_id not in body:
             raise Exception("Error: failed to find pdb_id '{}' in body:\n{}".format(pdb_id, body))
+        
+        uniprot_acc = None
+        for acc, entry in body[pdb_id]['UniProt'].items():
+            for m in entry['mappings']:
+                if m['chain_id'] is chain_id:
+                    uniprot_acc = acc
+                    break
 
-        uniprot_data = body[pdb_id]['UniProt']
-        uniprot_accs = uniprot_data.keys()
-        UNIPROT_ACCS_FOR_PDB_CACHE[pdb_id] = uniprot_accs
+        if not uniprot_acc:
+            raise Exception("Error: failed to find chain '{}' in uniprot mappings for PDB id ''".format(chain_id, pdb_id))
 
-    return uniprot_accs
+        UNIPROT_ACC_FOR_PDB_CACHE[cache_key] = uniprot_acc
+
+    return uniprot_acc
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Provide UniProtKB information for CATH domains")
@@ -96,9 +118,12 @@ if __name__ == '__main__':
         help="input file (CATH domain ids)")
     parser.add_argument('-o', dest="outfile", nargs="?", type=argparse.FileType('w'), default=sys.stdout,
         help="output file (UniProtKB info)")
+    parser.add_argument('-w', '--warn', dest="warn_on_error", type=bool, default=True,
+        help="warn (and skip entry) if encountering errors")
     args = parser.parse_args()
 
     writer = csv.writer(args.outfile, delimiter='\t')
+    warn_on_error = args.warn_on_error
 
     with open(args.infile, 'r') as infh:
         writer.writerow(["domain_id", "pdb_code", "accession", "gene_id", "taxon_id"])
@@ -107,8 +132,20 @@ if __name__ == '__main__':
                 continue
             domain_id = line.split()[0]
             pdb_code = domain_id[0:4]
-            uniprot_accs = get_uniprot_accs_for_pdb(pdb_code)
-            for uniprot_acc in uniprot_accs:
+            chain_id = domain_id[4:5]
+
+            u = None
+            try:
+                uniprot_acc = get_uniprot_acc_for_pdbchain(pdb_code, chain_id)
                 u = get_uniprot(uniprot_acc)
+            except PdbNotFoundError as e:
+                msg = "{}".format(e)
+                if warn_on_error:
+                    print("# {} (ignoring as --warn is true)".format(e))
+                    continue
+                else:
+                    raise Exception("{} (use --warn to skip)".format(e))
+
+            if u:
                 writer.writerow([domain_id, pdb_code, u.accession, u.gene_id, u.taxon_id])
 
