@@ -41,16 +41,16 @@ class Uniprot(object):
         return cls(accession=accession, gene_id=gene_id, taxon_id=taxon_id, 
             taxon_lineage=taxon_lineage)
 
-UNIPROTS_FOR_PDB_CACHE={}
-def uniprots_for_pdb(pdb_id, *, offset=0, size=100):
+UNIPROT_CACHE={}
+def get_uniprot(uniprot_acc):
 
     uniprot_base = 'https://www.ebi.ac.uk/proteins/api/proteins'
     headers = {"Accept": "application/json"}
 
-    if pdb_id in UNIPROTS_FOR_PDB_CACHE:
-        uniprot_entries = UNIPROTS_FOR_PDB_CACHE[pdb_id]
+    if uniprot_acc in UNIPROT_CACHE:
+        uniprot_entry = UNIPROT_CACHE[uniprot_acc]
     else:
-        url = "{}/pdb:{}?offset={}&size={}".format(uniprot_base, pdb_id, offset, size)
+        url = "{}/{}".format(uniprot_base, uniprot_acc)
         r = requests.get(url, headers=headers)
         if not r.ok:
             r.raise_for_status()
@@ -58,14 +58,37 @@ def uniprots_for_pdb(pdb_id, *, offset=0, size=100):
         LOG.debug("url: {}".format(url))
         LOG.debug("r: {}".format(r.content[0:100]))
         body = r.json()
-        uniprot_entries = []
-        for uniprot_data in body:
-            u = Uniprot.new_from_api_data(uniprot_data)
-            uniprot_entries.extend([u])
+        uniprot_entry = Uniprot.new_from_api_data(body)
 
-        UNIPROTS_FOR_PDB_CACHE[pdb_id] = uniprot_entries
+        UNIPROT_CACHE[uniprot_acc] = uniprot_entry
 
-    return uniprot_entries
+    return uniprot_entry
+
+UNIPROT_ACCS_FOR_PDB_CACHE={}
+def get_uniprot_accs_for_pdb(pdb_id, *, offset=0, size=100):
+
+    pdbe_base = 'https://www.ebi.ac.uk/pdbe/api/mappings/uniprot'
+    headers = {"Accept": "application/json"}
+
+    if pdb_id in UNIPROT_ACCS_FOR_PDB_CACHE:
+        uniprot_accs = UNIPROT_ACCS_FOR_PDB_CACHE[pdb_id]
+    else:
+        url = "{}/{}".format(pdbe_base, pdb_id)
+        r = requests.get(url, headers=headers)
+        if not r.ok:
+            r.raise_for_status()
+        
+        LOG.debug("url: {}".format(url))
+        LOG.debug("r: {}".format(r.content[0:100]))
+        body = r.json()
+        if pdb_id not in body:
+            raise Exception("Error: failed to find pdb_id '{}' in body:\n{}".format(pdb_id, body))
+
+        uniprot_data = body[pdb_id]['UniProt']
+        uniprot_accs = uniprot_data.keys()
+        UNIPROT_ACCS_FOR_PDB_CACHE[pdb_id] = uniprot_accs
+
+    return uniprot_accs
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Provide UniProtKB information for CATH domains")
@@ -77,15 +100,15 @@ if __name__ == '__main__':
 
     writer = csv.writer(args.outfile, delimiter='\t')
 
-
     with open(args.infile, 'r') as infh:
         writer.writerow(["domain_id", "pdb_code", "accession", "gene_id", "taxon_id"])
         for line in infh:
             if line.startswith('#'):
                 continue
-            domain_id  = line.split()[0]
+            domain_id = line.split()[0]
             pdb_code = domain_id[0:4]
-            uniprot_entries = uniprots_for_pdb(pdb_code)
-            for u in uniprot_entries:
+            uniprot_accs = get_uniprot_accs_for_pdb(pdb_code)
+            for uniprot_acc in uniprot_accs:
+                u = get_uniprot(uniprot_acc)
                 writer.writerow([domain_id, pdb_code, u.accession, u.gene_id, u.taxon_id])
 
